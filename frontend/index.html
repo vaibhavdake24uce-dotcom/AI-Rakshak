@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071923">
+  <title>AI Rakshak | Flood Intelligence</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./theme.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">AR</div><div><strong>AI RAKSHAK</strong><span>DISASTER INTELLIGENCE</span></div></div>
+      <div class="workspace-label">WORKSPACE</div>
+      <button class="nav-item active" data-view="overview"><span>◫</span> Overview</button>
+      <button class="nav-item" data-view="incidents"><span>⌁</span> Incident desk <b id="navIncidentCount">—</b></button>
+      <button class="nav-item" data-view="global"><span>◉</span> Global alerts <b id="navGlobalCount">—</b></button>
+      <button class="nav-item" data-view="map"><span>◎</span> Geo explorer</button>
+      <button class="nav-item" data-view="shelters"><span>⌂</span> Shelters</button>
+      <button class="nav-item" data-view="sources"><span>▤</span> Data sources</button>
+      <div class="sidebar-bottom">
+        <div class="live-dot"></div><div><strong>Prototype environment</strong><small>Demo records only</small></div>
+        <div class="avatar">VR</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div><div class="eyebrow">OPERATIONS CENTER <span class="tiny-separator">/</span> INDIA</div><h1 id="pageTitle">Situation overview</h1></div>
+        <div class="top-actions"><span class="status-pill" id="apiStatus" role="status" aria-live="polite"><i></i><span>Checking API…</span></span><button class="button button-ghost" id="refreshBtn">↻ Refresh</button><button class="button button-primary" id="newIncidentBtn">＋ Report incident</button></div>
+      </header>
+
+      <div class="safety-banner"><span class="banner-icon">!</span><div><strong>Prototype — not an official warning system</strong><p>Regional incidents and shelters are demo records. GDACS alerts are informational and not a complete global risk picture. Do not use this dashboard for real rescue, evacuation, or route-safety decisions.</p></div><button id="dismissBanner" aria-label="Dismiss notice">×</button></div>
+
+      <section class="view active" id="view-overview">
+        <div class="welcome-row"><div><h2>Regional situation</h2><p>Wainganga corridor · Bhandara / Gondia · illustrative workspace</p></div><div class="date-chip"><span class="date-dot"></span><span id="lastUpdated">Loading dashboard data…</span></div></div>
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-top"><span>Open incidents</span><span class="stat-icon orange">⌁</span></div><div class="stat-value" id="openCount">—</div><div class="stat-foot"><span class="foot-neutral">Current database</span></div></article>
+          <article class="stat-card"><div class="stat-top"><span>Critical priority</span><span class="stat-icon red">!</span></div><div class="stat-value" id="criticalCount">—</div><div class="stat-foot"><span class="foot-neutral">Requires human review</span></div></article>
+          <article class="stat-card"><div class="stat-top"><span>Awaiting verification</span><span class="stat-icon yellow">◷</span></div><div class="stat-value" id="unverifiedCount">—</div><div class="stat-foot"><span class="foot-neutral">Do not treat as confirmed</span></div></article>
+          <article class="stat-card"><div class="stat-top"><span>Shelters listed</span><span class="stat-icon teal">⌂</span></div><div class="stat-value" id="shelterCount">—</div><div class="stat-foot"><span class="foot-neutral">Availability unverified</span></div></article>
+        </div>
+        <div class="content-grid">
+          <article class="panel map-panel"><div class="panel-heading"><div><h3>Geospatial overview</h3><p>Incident and shelter points · demo locations</p></div><button class="text-button" data-goto="map">Open explorer ↗</button></div><div id="miniMap" class="map"></div><div class="map-legend"><span><i class="legend-dot red-dot"></i> Incident</span><span><i class="legend-dot teal-dot"></i> Shelter (unverified)</span><span class="map-note">Map tiles require internet</span></div></article>
+          <article class="panel activity-panel"><div class="panel-heading"><div><h3>Incident desk</h3><p>Most recent reports</p></div><button class="text-button" data-goto="incidents">View all ↗</button></div><div id="recentIncidents" class="recent-list"><div class="loading">Loading incidents…</div></div></article>
+        </div>
+        <div class="bottom-grid">
+          <article class="panel"><div class="panel-heading"><div><h3>Data readiness</h3><p>Sources must be checked before modelling</p></div><span class="mini-badge">PRE-MODEL</span></div><div class="readiness-list"><div><span class="readiness-icon">01</span><div><strong>Rainfall observations</strong><small>Download and validate timestamps / station coverage</small></div><span class="state-tag pending">Check</span></div><div><span class="readiness-icon">02</span><div><strong>Historical flood extents</strong><small>Confirm date, spatial coverage and label quality</small></div><span class="state-tag pending">Check</span></div><div><span class="readiness-icon">03</span><div><strong>Model evaluation</strong><small>No trained model or measured accuracy included</small></div><span class="state-tag blocked">Not ready</span></div></div></article>
+          <article class="panel risk-panel"><div class="panel-heading"><div><h3>Risk indicator sandbox</h3><p>Illustrative inputs only — not a forecast</p></div><span class="mini-badge demo">DEMO</span></div><div class="risk-inputs"><label>Rainfall (mm)<input id="rainfallInput" type="number" min="0" max="1000" value="35"></label><label>River level (m)<input id="riverInput" type="number" min="0" max="100" step="0.1" value="2.4"></label></div><button class="button button-primary full-width" id="calculateRisk">Calculate demo indicator</button><div class="risk-result"><div class="risk-number" id="riskNumber">—<small>/100</small></div><div><strong id="riskBand">Waiting for input</strong><p id="riskMethod">Rule-based illustration only.</p></div></div></article>
+        </div>
+        <article class="panel global-preview">
+          <div class="panel-heading"><div><h3>Worldwide hazard snapshot</h3><p>Current events reported by GDACS · source-defined coverage</p></div><button class="text-button" data-goto="global">View global alerts ↗</button></div>
+          <div id="globalPreview" class="recent-list"><div class="loading">Loading GDACS events…</div></div>
+        </article>
+      </section>
+
+      <section class="view" id="view-global">
+        <div class="section-intro"><div><h2>Global disaster alerts</h2><p>Current GDACS events worldwide. Feed coverage and reporting are source-defined; absence of an event is not evidence of safety.</p></div><span class="mini-badge">GDACS · RSS</span></div>
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-top"><span>Current events</span><span class="stat-icon teal">◉</span></div><div class="stat-value" id="globalTotal">—</div><div class="stat-foot">Reported by the source feed</div></article>
+          <article class="stat-card"><div class="stat-top"><span>Red alerts</span><span class="stat-icon red">!</span></div><div class="stat-value" id="globalRed">—</div><div class="stat-foot">Source-assigned alert level</div></article>
+          <article class="stat-card"><div class="stat-top"><span>Orange alerts</span><span class="stat-icon orange">!</span></div><div class="stat-value" id="globalOrange">—</div><div class="stat-foot">Source-assigned alert level</div></article>
+          <article class="stat-card"><div class="stat-top"><span>Green alerts</span><span class="stat-icon yellow">•</span></div><div class="stat-value" id="globalGreen">—</div><div class="stat-foot">Source-assigned alert level</div></article>
+        </div>
+        <article class="panel">
+          <div class="panel-heading"><div><h3>Latest current events</h3><p id="globalFeedUpdated">Waiting for GDACS feed…</p></div><a class="text-button" href="https://www.gdacs.org/" target="_blank" rel="noopener noreferrer">GDACS source ↗</a></div>
+          <div class="global-filters">
+            <label class="global-search"><span class="sr-only">Search global alerts</span><input id="globalSearch" type="search" placeholder="Search event, country or type…" autocomplete="off"></label>
+            <label class="global-level-filter"><span class="sr-only">Filter by alert level</span><select id="globalLevelFilter"><option value="">All alert levels</option><option value="Red">Red alerts</option><option value="Orange">Orange alerts</option><option value="Green">Green alerts</option></select></label>
+            <span id="globalResultCount" class="result-count" aria-live="polite"></span>
+          </div>
+          <div id="globalEventList" class="recent-list"><div class="loading">Loading GDACS events…</div></div>
+        </article>
+      </section>
+
+      <section class="view" id="view-incidents">
+        <div class="section-intro"><div><h2>Incident management</h2><p>Submit reports, then review and update their status. New reports are unverified by default.</p></div><button class="button button-primary" id="newIncidentBtn2">＋ Report incident</button></div>
+        <div class="filter-row"><input id="incidentSearch" placeholder="Search title or district…" aria-label="Search incidents"><select id="statusFilter"><option value="">All statuses</option><option value="reported">Reported</option><option value="reviewing">Reviewing</option><option value="verified">Verified</option><option value="resolved">Resolved</option></select><select id="severityFilter"><option value="">All priorities</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
+        <div id="incidentTable" class="panel table-panel"><div class="loading">Loading incidents…</div></div>
+      </section>
+
+      <section class="view" id="view-map">
+        <div class="section-intro"><div><h2>Geo explorer</h2><p>Points are illustrative and are not a verified flood perimeter or safe route.</p></div><span class="mini-badge demo">DEMO COORDINATES</span></div>
+        <div class="panel"><div id="fullMap" class="map full-map"></div><div class="map-legend"><span><i class="legend-dot red-dot"></i> Incident</span><span><i class="legend-dot teal-dot"></i> Shelter (unverified)</span><span class="map-note">No route-safety calculation is provided</span></div></div>
+      </section>
+
+      <section class="view" id="view-shelters">
+        <div class="section-intro"><div><h2>Shelter directory</h2><p>Capacity and occupancy are demo values; verify directly before relying on them.</p></div></div>
+        <div id="shelterGrid" class="shelter-grid"><div class="loading">Loading shelters…</div></div>
+      </section>
+
+      <section class="view" id="view-sources">
+        <div class="section-intro"><div><h2>Dataset register</h2><p>Candidate public sources, not a claim that every file is accessible or licensed for every use.</p></div><span class="mini-badge">PROVENANCE</span></div>
+        <div id="sourceList" class="source-list"><div class="loading">Loading data sources…</div></div>
+        <div class="panel source-note"><h3>Before any dataset enters the model</h3><ol><li>Download a representative sample and preserve the original file.</li><li>Record source URL, retrieval date, licence/terms and geographic/time coverage.</li><li>Audit columns, missing values, duplicates, timestamp formats and coordinates.</li><li>Keep unknown labels unknown. Do not infer “not flooded” from missing imagery.</li><li>Separate train/test by event or time to avoid leakage.</li></ol></div>
+      </section>
+
+      <footer class="footer"><span>AI RAKSHAK <span class="footer-muted">· prototype v0.1.0</span></span><span>Built for research and demonstration · Not an official emergency service</span></footer>
+    </main>
+  </div>
+
+  <dialog id="incidentDialog" class="incident-dialog">
+    <form id="incidentForm">
+      <div class="dialog-heading"><div><span class="eyebrow">INCIDENT DESK</span><h2>Report an incident</h2><p>New entries are stored as unverified reports.</p></div><button type="button" class="close-button" id="closeDialog">×</button></div>
+      <label>Incident title<input name="title" required minlength="3" maxlength="140" placeholder="e.g. Waterlogging near road"></label>
+      <label>Description<textarea name="description" maxlength="2000" rows="3" placeholder="Describe what was reported; avoid personal/sensitive information."></textarea></label>
+      <div class="form-two"><label>District<input name="district" required value="Bhandara" maxlength="80"></label><label>Priority<select name="severity"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="critical">Critical</option></select></label></div>
+      <div class="form-two"><label>Latitude<input name="latitude" type="number" step="any" min="-90" max="90" required value="21.1667"></label><label>Longitude<input name="longitude" type="number" step="any" min="-180" max="180" required value="79.65"></label></div>
+      <p class="form-note">Use a location you have permission to record. Coordinates are not automatically verified.</p>
+      <div id="formError" class="form-error" role="alert"></div>
+      <div class="dialog-actions"><button type="button" class="button button-ghost" id="cancelDialog">Cancel</button><button type="submit" class="button button-primary" id="submitIncident">Save report</button></div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="./app.js"></script>
+</body>
+</html>
