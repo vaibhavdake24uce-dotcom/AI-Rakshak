@@ -11,6 +11,8 @@ A runnable, full-stack prototype for exploring historical flood context, logging
 - Create and update incidents
 - Dashboard statistics and recent activity
 - Current worldwide disaster-event feed from GDACS (cached; source coverage and alert levels are not a complete risk assessment)
+- Built-in app guide for feature-specific help; it runs locally and is not connected to a generative AI service
+- The app guide explains dashboard workflows, offers navigation shortcuts, and does not send questions to external services
 - Data-source freshness/status view
 - Demo risk indicator with explanation and clear disclaimer
 - OpenStreetMap-based map using Leaflet CDN; incident/shelter lists still work if the map CDN is unavailable

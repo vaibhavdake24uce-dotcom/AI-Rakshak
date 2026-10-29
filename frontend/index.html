@@ -102,6 +102,40 @@
     </main>
   </div>
 
+  <aside class="guide-widget" aria-label="Application guide">
+    <section class="guide-panel" id="guidePanel" aria-labelledby="guideTitle" hidden>
+      <header class="guide-header">
+        <div class="guide-avatar" aria-hidden="true">AR</div>
+        <div class="guide-heading">
+          <strong id="guideTitle">Rakshak Guide</strong>
+          <span>Help using this dashboard</span>
+        </div>
+        <button class="guide-close" id="guideClose" type="button" aria-label="Close guide">×</button>
+      </header>
+      <div class="guide-disclaimer">Instant answers from the built-in app guide. No external AI service is connected.</div>
+      <div class="guide-messages" id="guideMessages" role="log" aria-live="polite" aria-relevant="additions">
+        <div class="guide-message assistant-message">
+          <span class="message-label">RAKSHAK GUIDE</span>
+          <p>Hi! I can show you around. Ask how to report an incident, find global alerts, use the map, or check a shelter.</p>
+        </div>
+      </div>
+      <div class="guide-suggestions" id="guideSuggestions" aria-label="Suggested questions">
+        <button type="button" class="guide-suggestion">How do I report an incident?</button>
+        <button type="button" class="guide-suggestion">What are global alerts?</button>
+        <button type="button" class="guide-suggestion">How do I use the map?</button>
+      </div>
+      <form class="guide-form" id="guideForm">
+        <label class="sr-only" for="guideInput">Ask how to use this dashboard</label>
+        <input id="guideInput" name="question" type="text" maxlength="400" placeholder="Ask how to use the dashboard…" autocomplete="off" required>
+        <button class="guide-send" type="submit" aria-label="Send question">Send</button>
+      </form>
+      <p class="guide-safety-note">For emergencies, contact local authorities. This demo is not an emergency service.</p>
+    </section>
+    <button class="guide-launcher" id="guideLauncher" type="button" aria-expanded="false" aria-controls="guidePanel">
+      <span class="guide-launcher-icon" aria-hidden="true">✦</span><span>App guide</span>
+    </button>
+  </aside>
+
   <dialog id="incidentDialog" class="incident-dialog">
     <form id="incidentForm">
       <div class="dialog-heading"><div><span class="eyebrow">INCIDENT DESK</span><h2>Report an incident</h2><p>New entries are stored as unverified reports.</p></div><button type="button" class="close-button" id="closeDialog">×</button></div>

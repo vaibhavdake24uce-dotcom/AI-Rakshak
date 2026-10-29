@@ -60,6 +60,103 @@ document.querySelectorAll("[data-view]").forEach(btn => btn.addEventListener("cl
 document.querySelectorAll("[data-goto]").forEach(btn => btn.addEventListener("click", () => navigate(btn.dataset.goto)));
 $("dismissBanner").addEventListener("click", () => document.querySelector(".safety-banner").remove());
 
+const guideTopics = [
+  {
+    view: "incidents",
+    terms: ["incident", "report", "status", "review", "verify"],
+    answer: "To submit a report, open Incident desk and select Report incident. Add a title, district, priority and coordinates, then save. New reports start as unverified. In the incident table, use Update… to change a report's status."
+  },
+  {
+    view: "global",
+    terms: ["global", "world", "gdacs", "alert", "disaster"],
+    answer: "Global alerts shows current events from the GDACS feed, including source-assigned alert levels. Use the search box or alert-level filter to narrow the list. Feed coverage is not comprehensive, and these alerts are informational—not a safety assessment."
+  },
+  {
+    view: "map",
+    terms: ["map", "geo", "location", "coordinate", "explorer"],
+    answer: "Geo explorer plots incident and shelter locations. Red markers are incidents; teal markers are shelters. Current regional coordinates are illustrative. The map needs an internet connection for its tiles and does not identify safe routes."
+  },
+  {
+    view: "shelters",
+    terms: ["shelter", "capacity", "occupancy"],
+    answer: "Open Shelters to browse the directory. Capacity, occupancy and availability are demo values and have not been independently verified. Contact the relevant provider before relying on them."
+  },
+  {
+    view: "sources",
+    terms: ["source", "dataset", "data", "rainfall", "model"],
+    answer: "Data sources lists candidate datasets and their access/licence checks. Treat them as candidates, not approved inputs. Verify the source, terms, coverage, timestamps and data quality before using any dataset."
+  },
+  {
+    view: "overview",
+    terms: ["risk", "indicator", "rain", "river", "calculate", "forecast"],
+    answer: "The overview's Risk indicator sandbox accepts rainfall and river-level values and calls a simple demo formula. It is not a forecast, trained model or official warning. Do not use it to make safety decisions."
+  },
+  {
+    view: null,
+    terms: ["api", "connect", "backend", "refresh", "loading"],
+    answer: "The API status appears near the top of the page. Use Refresh to reload dashboard data. If the API is unavailable, start the FastAPI server and open its address (usually http://127.0.0.1:8000); static Live Server alone does not run the backend."
+  }
+];
+
+function setGuideOpen(open) {
+  $("guidePanel").hidden = !open;
+  $("guideLauncher").setAttribute("aria-expanded", String(open));
+  if (open) $("guideInput").focus();
+}
+
+function addGuideMessage(message, sender, actionView = null) {
+  const article = document.createElement("article");
+  article.className = `guide-message ${sender === "user" ? "user-message" : "assistant-message"}`;
+  const label = document.createElement("span");
+  label.className = "message-label";
+  label.textContent = sender === "user" ? "YOU" : "RAKSHAK GUIDE";
+  const body = document.createElement("p");
+  body.textContent = message;
+  article.append(label, body);
+  if (actionView) {
+    const action = document.createElement("button");
+    action.type = "button";
+    action.className = "guide-action";
+    action.textContent = `Open ${actionView === "global" ? "Global alerts" : titleCase(actionView)}`;
+    action.addEventListener("click", () => {
+      navigate(actionView);
+      setGuideOpen(false);
+    });
+    article.append(action);
+  }
+  $("guideMessages").append(article);
+  $("guideMessages").scrollTop = $("guideMessages").scrollHeight;
+}
+
+function guideAnswer(question) {
+  const normalized = question.toLowerCase();
+  const topic = guideTopics.find(item => item.terms.some(term => normalized.includes(term)));
+  if (topic) return topic;
+  return {
+    view: null,
+    answer: "I can help with reporting incidents, status updates, global alerts, maps, shelters, data sources, the demo risk indicator, and API connection. Try asking about one of those. This guide is built into the app and does not use a connected generative AI service."
+  };
+}
+
+function sendGuideQuestion(question) {
+  const trimmed = question.trim();
+  if (!trimmed) return;
+  addGuideMessage(trimmed, "user");
+  const response = guideAnswer(trimmed);
+  addGuideMessage(response.answer, "assistant", response.view);
+  $("guideInput").value = "";
+}
+
+$("guideLauncher").addEventListener("click", () => setGuideOpen($("guidePanel").hidden));
+$("guideClose").addEventListener("click", () => setGuideOpen(false));
+$("guideForm").addEventListener("submit", event => {
+  event.preventDefault();
+  sendGuideQuestion($("guideInput").value);
+});
+document.querySelectorAll(".guide-suggestion").forEach(button => {
+  button.addEventListener("click", () => sendGuideQuestion(button.textContent));
+});
+
 function incidentStatusClass(status) { return `pill-${["reported","reviewing","verified","resolved"].includes(status) ? status : "reported"}`; }
 function severityClass(severity) { return `pill-${["critical","high","medium","low"].includes(severity) ? severity : "medium"}`; }
 
